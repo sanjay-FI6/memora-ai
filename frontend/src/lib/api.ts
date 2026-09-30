@@ -1,6 +1,12 @@
 export function getApiBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envUrl && !envUrl.includes("<") && !envUrl.includes(">")) {
+    try {
+      new URL(envUrl);
+      return envUrl.replace(/\/$/, "");
+    } catch {
+      // Invalid URL format, fall through to auto-detection
+    }
   }
   if (typeof window !== "undefined") {
     // If in production on HTTPS or on Render, prefer relative API path (handled by Next.js rewrites)
