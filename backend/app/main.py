@@ -13,7 +13,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable comprehensive CORS for Next.js frontend and local dev environments
+# Enable comprehensive CORS for Next.js frontend, Render deployments, and local dev environments
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -24,15 +24,17 @@ origins = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://localhost:8010",
-    "http://127.0.0.1:8010"
+    "http://127.0.0.1:8010",
+    "https://memora-ai-frontend.onrender.com",
+    "https://memora-ai.onrender.com"
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://.*\.onrender\.com$",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"]
 )

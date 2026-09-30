@@ -784,7 +784,9 @@ export default function DashboardLayout() {
                       <AlertTriangle className="h-4 w-4" /> Analysis failed
                     </div>
                     <p className="mt-1 text-rose-200/80">{analysisError}</p>
-                    <p className="mt-2 text-[10px] text-rose-200/60">Make sure the backend is running on port 8010.</p>
+                    <p className="mt-2 text-[10px] text-rose-200/60">
+                      Check backend connectivity and verify NEXT_PUBLIC_API_URL or CORS settings.
+                    </p>
                   </div>
                 )}
 
