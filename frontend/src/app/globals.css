@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0F172A;
+  --foreground: #F8FAFC;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom glassmorphism panel style */
+.glass-panel {
+  backdrop-filter: blur(12px);
+  background-color: rgba(30, 41, 59, 0.45);
+  border: 1px solid rgba(71, 85, 105, 0.25);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.glass-panel:hover {
+  border-color: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 10px 35px -10px rgba(99, 102, 241, 0.15);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0F172A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Code area custom styles */
+.code-textarea {
+  font-family: 'JetBrains Mono', monospace;
+  background-color: #0b0f19;
+}
+
+/* React Flow styling overrides to match dark theme */
+.react-flow {
+  background-color: transparent !important;
+}
+
+.react-flow__node {
+  border-radius: 0.75rem !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+.react-flow__edge-path {
+  stroke: #475569 !important;
+  stroke-width: 2px !important;
+}
+
+.react-flow__controls {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+}
+
+.react-flow__controls-button {
+  background-color: transparent !important;
+  border-bottom: 1px solid #334155 !important;
+  fill: #94a3b8 !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #334155 !important;
+  fill: #f8fafc !important;
+}
