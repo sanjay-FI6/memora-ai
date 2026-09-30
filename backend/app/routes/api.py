@@ -127,9 +127,132 @@ def generate_dynamic_concept_graph(code: str, error_type: str, language: str) ->
     code_lower = code.lower()
     has_error = error_type not in ["No error is found", "Clean Code Check", ""]
 
-    # 1. Tree / Recursion / Binary Search Snippets
-    if any(k in code_lower for k in ["tree", "node->left", "node->right", "root", "recursion", "binary_search", "left", "right", "mid"]):
-        if not has_error and ("binary_search" in code_lower or ("left" in code_lower and "right" in code_lower and "mid" in code_lower)):
+    # 1. Linked List / Pointer Chaining Data Structures
+    if any(k in code_lower for k in ["linkedlist", "linked_list", "self.head", "self.next", "listnode", "node", "head", "next"]):
+        if not has_error:
+            nodes = [
+                {
+                    "id": "node-ds",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {
+                        "label": "Data Structures Hub",
+                        "category": "Foundation Hub",
+                        "shape": "circle",
+                        "status": "proficient",
+                        "proficiency": "proficient",
+                        "progress": 98,
+                        "description": "Foundational abstract data types and node link topologies."
+                    }
+                },
+                {
+                    "id": "node-ll",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {
+                        "label": "Linked List Nodes",
+                        "category": "Structure",
+                        "shape": "pill",
+                        "status": "proficient",
+                        "proficiency": "proficient",
+                        "progress": 95,
+                        "description": "Object and pointer node encapsulation with data payload and next pointer."
+                    }
+                },
+                {
+                    "id": "node-ptrs",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {
+                        "label": "Reference Chaining",
+                        "category": "Core Flow",
+                        "shape": "pill",
+                        "status": "proficient",
+                        "proficiency": "proficient",
+                        "progress": 94,
+                        "description": "Dynamic pointer linking, head-to-tail traversal, and sentinel guards."
+                    }
+                },
+                {
+                    "id": "node-traversal",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {
+                        "label": "Sequential Traversal Guarantees",
+                        "category": "Safety Check",
+                        "shape": "pill",
+                        "status": "proficient",
+                        "proficiency": "proficient",
+                        "progress": 96,
+                        "description": "Deterministic iteration stopping criteria and null termination verification."
+                    }
+                },
+                {
+                    "id": "node-invariants",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {
+                        "label": "Object Invariant Safety",
+                        "category": "Verified Clean",
+                        "shape": "pill",
+                        "status": "proficient",
+                        "proficiency": "proficient",
+                        "progress": 97,
+                        "description": "Verified clean! All head, next references, and initializations are safe."
+                    }
+                }
+            ]
+            edges = [
+                {"id": "e-ll-1", "source": "node-ds", "target": "node-ll", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-ll-2", "source": "node-ds", "target": "node-ptrs", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-ll-3", "source": "node-ll", "target": "node-traversal", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-ll-4", "source": "node-ptrs", "target": "node-invariants", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+            ]
+            return {"nodes": nodes, "edges": edges}
+        else:
+            nodes = [
+                {
+                    "id": "node-ds",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {"label": "Data Structures Hub", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 98, "description": "Foundational abstract data structures."}
+                },
+                {
+                    "id": "node-ll",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {"label": "Linked List Nodes", "category": "Structure", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 82, "description": "Node instantiation and memory allocation."}
+                },
+                {
+                    "id": "node-ptrs",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {"label": "Reference Chaining", "category": "Core Flow", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 52, "description": "Pointer linking and reference chains."}
+                },
+                {
+                    "id": "node-traversal",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {"label": "Traversal Bounds", "category": "Call Stack", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 45, "description": "Handling end-of-list boundary transitions."}
+                },
+                {
+                    "id": "node-failing",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {"label": error_type, "category": "Detected Gap", "shape": "pill", "status": "gap", "proficiency": "gap", "progress": 18, "description": "Unbound node reference or null dereference detected."}
+                }
+            ]
+            edges = [
+                {"id": "e-ll-1", "source": "node-ds", "target": "node-ll", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-ll-2", "source": "node-ds", "target": "node-ptrs", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-ll-3", "source": "node-ll", "target": "node-traversal", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-ll-4", "source": "node-ptrs", "target": "node-failing", "animated": True, "type": "dataFlow", "style": {"stroke": "#EF4444"}},
+            ]
+            return {"nodes": nodes, "edges": edges}
+
+    # 2. Tree / Recursion / Binary Search Snippets
+    elif any(k in code_lower for k in ["tree", "node->left", "node->right", "root", "recursion", "binary_search", "left", "right", "mid"]):
+        if not has_error:
             nodes = [
                 {
                     "id": "node-ds",
@@ -238,190 +361,344 @@ def generate_dynamic_concept_graph(code: str, error_type: str, language: str) ->
                     "id": "node-failing",
                     "type": "glowingConcept",
                     "position": {"x": 560, "y": 260},
-                    "data": {"label": error_type if has_error else "Null Base Case Invariants", "category": "Detected Gap" if has_error else "Verified Clean", "shape": "pill", "status": "gap" if has_error else "proficient", "proficiency": "gap" if has_error else "proficient", "progress": 18 if has_error else 92, "description": "Recursive tree base-case verification."}
+                    "data": {"label": error_type, "category": "Detected Gap", "shape": "pill", "status": "gap", "proficiency": "gap", "progress": 18, "description": "Recursive tree base-case verification."}
                 }
             ]
             edges = [
                 {"id": "e1-2", "source": "node-ds", "target": "node-trees", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
-                {"id": "e1-3", "source": "node-ds", "target": "node-traversal", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B" if has_error else "#10B981"}},
-                {"id": "e2-4", "source": "node-trees", "target": "node-recursion", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B" if has_error else "#10B981"}},
-                {"id": "e3-5", "source": "node-traversal", "target": "node-failing", "animated": has_error, "type": "dataFlow", "style": {"stroke": "#EF4444" if has_error else "#10B981"}},
-                {"id": "e4-5", "source": "node-recursion", "target": "node-failing", "animated": has_error, "type": "dataFlow", "style": {"stroke": "#EF4444" if has_error else "#10B981"}},
+                {"id": "e1-3", "source": "node-ds", "target": "node-traversal", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e2-4", "source": "node-trees", "target": "node-recursion", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e3-5", "source": "node-traversal", "target": "node-failing", "animated": True, "type": "dataFlow", "style": {"stroke": "#EF4444"}},
+                {"id": "e4-5", "source": "node-recursion", "target": "node-failing", "animated": True, "type": "dataFlow", "style": {"stroke": "#EF4444"}},
             ]
         return {"nodes": nodes, "edges": edges}
 
-    # 2. I/O & Resource Allocation (e.g. fopen, open_database, database, socket)
-    elif any(k in code_lower for k in ["fopen", "open_database", "database", "socket", "connection", "conn."]):
-        status_leaf = "gap" if has_error else "proficient"
-        progress_leaf = 25 if has_error else 92
-        nodes = [
-            {
-                "id": "node-io",
-                "type": "glowingConcept",
-                "position": {"x": 30, "y": 150},
-                "data": {"label": "I/O Management", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 96, "description": "System kernel calls and file/socket handles."}
-            },
-            {
-                "id": "node-handles",
-                "type": "glowingConcept",
-                "position": {"x": 260, "y": 40},
-                "data": {"label": "Resource Descriptors", "category": "OS Level", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 82, "description": "File and socket table index allocation."}
-            },
-            {
-                "id": "node-lifecycle",
-                "type": "glowingConcept",
-                "position": {"x": 260, "y": 260},
-                "data": {"label": "Resource Lifecycle", "category": "Lifecycle", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 55, "description": "Acquisition and guaranteed release cycles."}
-            },
-            {
-                "id": "node-raii",
-                "type": "glowingConcept",
-                "position": {"x": 560, "y": 40},
-                "data": {"label": "RAII & Cleanup Guards", "category": "Pattern", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 48, "description": "Auto-closing context managers and finally blocks."}
-            },
-            {
-                "id": "node-leak",
-                "type": "glowingConcept",
-                "position": {"x": 560, "y": 260},
-                "data": {"label": "Unclosed Resource Leak" if has_error else "Reliable Handle Cleanup", "category": "Detected Gap" if has_error else "Verified Clean", "shape": "pill", "status": status_leaf, "proficiency": status_leaf, "progress": progress_leaf, "description": "Resource handle management."}
-            }
-        ]
-        edges = [
-            {"id": "e-io-1", "source": "node-io", "target": "node-handles", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
-            {"id": "e-io-2", "source": "node-io", "target": "node-lifecycle", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
-            {"id": "e-io-3", "source": "node-handles", "target": "node-raii", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
-            {"id": "e-io-4", "source": "node-lifecycle", "target": "node-leak", "animated": has_error, "type": "dataFlow", "style": {"stroke": "#EF4444" if has_error else "#10B981"}},
-        ]
+    # 3. I/O & Resource Allocation (e.g. fopen, open_database, database, socket)
+    elif any(k in code_lower for k in ["fopen", "open_database", "database", "socket", "connection", "conn"]):
+        if not has_error:
+            nodes = [
+                {
+                    "id": "node-io",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {"label": "I/O Management", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 98, "description": "System kernel calls and file/socket handles."}
+                },
+                {
+                    "id": "node-handles",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {"label": "Resource Descriptors", "category": "OS Level", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 95, "description": "File and socket table index allocation."}
+                },
+                {
+                    "id": "node-lifecycle",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {"label": "Resource Lifecycle", "category": "Lifecycle", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 94, "description": "Acquisition and guaranteed release cycles."}
+                },
+                {
+                    "id": "node-raii",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {"label": "RAII & Cleanup Guards", "category": "Pattern", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 96, "description": "Auto-closing context managers and finally blocks."}
+                },
+                {
+                    "id": "node-leak",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {"label": "Reliable Handle Cleanup", "category": "Verified Clean", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 97, "description": "Verified safe! All resources cleanly released."}
+                }
+            ]
+            edges = [
+                {"id": "e-io-1", "source": "node-io", "target": "node-handles", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-io-2", "source": "node-io", "target": "node-lifecycle", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-io-3", "source": "node-handles", "target": "node-raii", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-io-4", "source": "node-lifecycle", "target": "node-leak", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+            ]
+        else:
+            nodes = [
+                {
+                    "id": "node-io",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {"label": "I/O Management", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 96, "description": "System kernel calls and file/socket handles."}
+                },
+                {
+                    "id": "node-handles",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {"label": "Resource Descriptors", "category": "OS Level", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 82, "description": "File and socket table index allocation."}
+                },
+                {
+                    "id": "node-lifecycle",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {"label": "Resource Lifecycle", "category": "Lifecycle", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 55, "description": "Acquisition and guaranteed release cycles."}
+                },
+                {
+                    "id": "node-raii",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {"label": "RAII & Cleanup Guards", "category": "Pattern", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 48, "description": "Auto-closing context managers and finally blocks."}
+                },
+                {
+                    "id": "node-leak",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {"label": "Unclosed Resource Leak", "category": "Detected Gap", "shape": "pill", "status": "gap", "proficiency": "gap", "progress": 25, "description": "Resource handle management defect."}
+                }
+            ]
+            edges = [
+                {"id": "e-io-1", "source": "node-io", "target": "node-handles", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-io-2", "source": "node-io", "target": "node-lifecycle", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-io-3", "source": "node-handles", "target": "node-raii", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-io-4", "source": "node-lifecycle", "target": "node-leak", "animated": True, "type": "dataFlow", "style": {"stroke": "#EF4444"}},
+            ]
         return {"nodes": nodes, "edges": edges}
 
-    # 3. Array / Buffer Operations
+    # 4. Array / Buffer Operations
     elif any(k in code_lower for k in ["arr", "matrix", "buffer", "index", "vector", "sizeof"]):
-        status_leaf = "gap" if has_error else "proficient"
-        progress_leaf = 30 if has_error else 94
-        nodes = [
-            {
-                "id": "node-mem",
-                "type": "glowingConcept",
-                "position": {"x": 30, "y": 150},
-                "data": {"label": "Contiguous Memory", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 95, "description": "Sequential memory addresses and cache locality."}
-            },
-            {
-                "id": "node-offset",
-                "type": "glowingConcept",
-                "position": {"x": 260, "y": 40},
-                "data": {"label": "Pointer Offsets", "category": "Arithmetic", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 86, "description": "Element stride calculation based on type size."}
-            },
-            {
-                "id": "node-access",
-                "type": "glowingConcept",
-                "position": {"x": 260, "y": 260},
-                "data": {"label": "Indexing Contracts", "category": "Bounds", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 58, "description": "0-indexed upper and lower bound invariants."}
-            },
-            {
-                "id": "node-bounds",
-                "type": "glowingConcept",
-                "position": {"x": 560, "y": 40},
-                "data": {"label": "Boundary Checks", "category": "Guard", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 50, "description": "Pre-access boundary assertions."}
-            },
-            {
-                "id": "node-oob",
-                "type": "glowingConcept",
-                "position": {"x": 560, "y": 260},
-                "data": {"label": "Buffer Overflow / Bounds Check" if has_error else "Safe Array Indexing", "category": "Detected Gap" if has_error else "Verified Clean", "shape": "pill", "status": status_leaf, "proficiency": status_leaf, "progress": progress_leaf, "description": "Array bounds safety verification."}
-            }
-        ]
-        edges = [
-            {"id": "e-arr-1", "source": "node-mem", "target": "node-offset", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
-            {"id": "e-arr-2", "source": "node-mem", "target": "node-access", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
-            {"id": "e-arr-3", "source": "node-offset", "target": "node-bounds", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
-            {"id": "e-arr-4", "source": "node-access", "target": "node-oob", "animated": has_error, "type": "dataFlow", "style": {"stroke": "#EF4444" if has_error else "#10B981"}},
-        ]
+        if not has_error:
+            nodes = [
+                {
+                    "id": "node-mem",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {"label": "Contiguous Memory", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 98, "description": "Sequential memory addresses and cache locality."}
+                },
+                {
+                    "id": "node-offset",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {"label": "Pointer Offsets", "category": "Arithmetic", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 95, "description": "Element stride calculation based on type size."}
+                },
+                {
+                    "id": "node-access",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {"label": "Indexing Contracts", "category": "Bounds", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 94, "description": "0-indexed upper and lower bound invariants."}
+                },
+                {
+                    "id": "node-bounds",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {"label": "Boundary Checks", "category": "Guard", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 96, "description": "Pre-access boundary assertions."}
+                },
+                {
+                    "id": "node-oob",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {"label": "Safe Array Indexing", "category": "Verified Clean", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 97, "description": "Verified clean! Array bounds safety validated."}
+                }
+            ]
+            edges = [
+                {"id": "e-arr-1", "source": "node-mem", "target": "node-offset", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-arr-2", "source": "node-mem", "target": "node-access", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-arr-3", "source": "node-offset", "target": "node-bounds", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-arr-4", "source": "node-access", "target": "node-oob", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+            ]
+        else:
+            nodes = [
+                {
+                    "id": "node-mem",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {"label": "Contiguous Memory", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 95, "description": "Sequential memory addresses and cache locality."}
+                },
+                {
+                    "id": "node-offset",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {"label": "Pointer Offsets", "category": "Arithmetic", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 86, "description": "Element stride calculation based on type size."}
+                },
+                {
+                    "id": "node-access",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {"label": "Indexing Contracts", "category": "Bounds", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 58, "description": "0-indexed upper and lower bound invariants."}
+                },
+                {
+                    "id": "node-bounds",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {"label": "Boundary Checks", "category": "Guard", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 50, "description": "Pre-access boundary assertions."}
+                },
+                {
+                    "id": "node-oob",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {"label": "Buffer Overflow / Bounds Check", "category": "Detected Gap", "shape": "pill", "status": "gap", "proficiency": "gap", "progress": 30, "description": "Array bounds safety verification."}
+                }
+            ]
+            edges = [
+                {"id": "e-arr-1", "source": "node-mem", "target": "node-offset", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-arr-2", "source": "node-mem", "target": "node-access", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-arr-3", "source": "node-offset", "target": "node-bounds", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-arr-4", "source": "node-access", "target": "node-oob", "animated": True, "type": "dataFlow", "style": {"stroke": "#EF4444"}},
+            ]
         return {"nodes": nodes, "edges": edges}
 
-    # 4. Variable Scope / Name Typo (e.g. Python NameError)
-    elif "nameerror" in error_type.lower() or "scope" in error_type.lower() or "rint" in code_lower:
-        nodes = [
-            {
-                "id": "node-rt",
-                "type": "glowingConcept",
-                "position": {"x": 30, "y": 150},
-                "data": {"label": "Python Runtime", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 98, "description": "Interpreter bytecode and frame execution."}
-            },
-            {
-                "id": "node-scope",
-                "type": "glowingConcept",
-                "position": {"x": 260, "y": 40},
-                "data": {"label": "Lexical Scoping", "category": "Hierarchy", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 85, "description": "LEGB (Local, Enclosing, Global, Builtin) resolution."}
-            },
-            {
-                "id": "node-sym",
-                "type": "glowingConcept",
-                "position": {"x": 260, "y": 260},
-                "data": {"label": "Symbol Tables", "category": "Namespace", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 50, "description": "Identifier binding and namespace dictionary lookups."}
-            },
-            {
-                "id": "node-binding",
-                "type": "glowingConcept",
-                "position": {"x": 560, "y": 40},
-                "data": {"label": "Variable Lifetime", "category": "Binding", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 42, "description": "Assignment and evaluation ordering."}
-            },
-            {
-                "id": "node-name",
-                "type": "glowingConcept",
-                "position": {"x": 560, "y": 260},
-                "data": {"label": "NameError & Undefined Reference", "category": "Detected Gap", "shape": "pill", "status": "gap", "proficiency": "gap", "progress": 20, "description": "Referencing unbound or misspelled symbol."}
-            }
-        ]
-        edges = [
-            {"id": "e-py-1", "source": "node-rt", "target": "node-scope", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
-            {"id": "e-py-2", "source": "node-rt", "target": "node-sym", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
-            {"id": "e-py-3", "source": "node-scope", "target": "node-binding", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
-            {"id": "e-py-4", "source": "node-sym", "target": "node-name", "animated": True, "type": "dataFlow", "style": {"stroke": "#EF4444"}},
-        ]
+    # 5. Variable Scope / Name Typo (e.g. Python NameError or Python runtime)
+    elif "nameerror" in error_type.lower() or "scope" in error_type.lower() or language.lower() == "python":
+        if not has_error:
+            nodes = [
+                {
+                    "id": "node-rt",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {"label": "Python Runtime", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 98, "description": "Interpreter bytecode and frame execution."}
+                },
+                {
+                    "id": "node-scope",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {"label": "Lexical Scoping", "category": "Hierarchy", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 96, "description": "LEGB (Local, Enclosing, Global, Builtin) resolution."}
+                },
+                {
+                    "id": "node-sym",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {"label": "Symbol Resolution", "category": "Namespace", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 95, "description": "Identifier binding and namespace dictionary lookups."}
+                },
+                {
+                    "id": "node-binding",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {"label": "Variable Lifetime", "category": "Binding", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 94, "description": "Assignment and evaluation ordering."}
+                },
+                {
+                    "id": "node-name",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {"label": "Namespace & Scope Verified", "category": "Verified Clean", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 97, "description": "Verified clean! All variables, symbols, and scopes are properly declared and referenced."}
+                }
+            ]
+            edges = [
+                {"id": "e-py-1", "source": "node-rt", "target": "node-scope", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-py-2", "source": "node-rt", "target": "node-sym", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-py-3", "source": "node-scope", "target": "node-binding", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-py-4", "source": "node-sym", "target": "node-name", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+            ]
+        else:
+            nodes = [
+                {
+                    "id": "node-rt",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {"label": "Python Runtime", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 98, "description": "Interpreter bytecode and frame execution."}
+                },
+                {
+                    "id": "node-scope",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {"label": "Lexical Scoping", "category": "Hierarchy", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 85, "description": "LEGB (Local, Enclosing, Global, Builtin) resolution."}
+                },
+                {
+                    "id": "node-sym",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {"label": "Symbol Tables", "category": "Namespace", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 50, "description": "Identifier binding and namespace dictionary lookups."}
+                },
+                {
+                    "id": "node-binding",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {"label": "Variable Lifetime", "category": "Binding", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 42, "description": "Assignment and evaluation ordering."}
+                },
+                {
+                    "id": "node-name",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {"label": error_type if has_error else "Namespace & Scope Verified", "category": "Detected Gap", "shape": "pill", "status": "gap", "proficiency": "gap", "progress": 20, "description": "Referencing unbound or misspelled symbol."}
+                }
+            ]
+            edges = [
+                {"id": "e-py-1", "source": "node-rt", "target": "node-scope", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-py-2", "source": "node-rt", "target": "node-sym", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-py-3", "source": "node-scope", "target": "node-binding", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-py-4", "source": "node-sym", "target": "node-name", "animated": True, "type": "dataFlow", "style": {"stroke": "#EF4444"}},
+            ]
         return {"nodes": nodes, "edges": edges}
 
-    # 5. Default Pointer / Memory Safety Graph
+    # 6. Default Pointer / Memory Safety Graph
     else:
-        status_leaf = "gap" if has_error else "proficient"
-        progress_leaf = 18 if has_error else 95
-        nodes = [
-            {
-                "id": "node-heap",
-                "type": "glowingConcept",
-                "position": {"x": 30, "y": 150},
-                "data": {"label": "Memory Allocation", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 96, "description": "Dynamic memory allocation and pointer references."}
-            },
-            {
-                "id": "node-ptrs",
-                "type": "glowingConcept",
-                "position": {"x": 260, "y": 40},
-                "data": {"label": "Pointers & References", "category": "Indirection", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 82, "description": "Memory addresses and dereferencing."}
-            },
-            {
-                "id": "node-offsets",
-                "type": "glowingConcept",
-                "position": {"x": 260, "y": 260},
-                "data": {"label": "Struct Field Offsets", "category": "Alignment", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 55, "description": "Accessing object fields relative to base pointer."}
-            },
-            {
-                "id": "node-guards",
-                "type": "glowingConcept",
-                "position": {"x": 560, "y": 40},
-                "data": {"label": "Defensive Null Guards", "category": "Safety Check", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 45, "description": "Pre-check base pointer for NULL before dereferencing."}
-            },
-            {
-                "id": "node-deref",
-                "type": "glowingConcept",
-                "position": {"x": 560, "y": 260},
-                "data": {"label": "Null Pointer Dereference" if has_error else "Memory & Bounds Safety", "category": "Detected Gap" if has_error else "Verified Clean", "shape": "pill", "status": status_leaf, "proficiency": status_leaf, "progress": progress_leaf, "description": "Safety invariant verification."}
-            }
-        ]
-        edges = [
-            {"id": "e-ptr-1", "source": "node-heap", "target": "node-ptrs", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
-            {"id": "e-ptr-2", "source": "node-heap", "target": "node-offsets", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
-            {"id": "e-ptr-3", "source": "node-ptrs", "target": "node-guards", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
-            {"id": "e-ptr-4", "source": "node-offsets", "target": "node-deref", "animated": has_error, "type": "dataFlow", "style": {"stroke": "#EF4444" if has_error else "#10B981"}},
-        ]
+        if not has_error:
+            nodes = [
+                {
+                    "id": "node-heap",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {"label": "Memory Allocation", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 98, "description": "Dynamic memory allocation and pointer references."}
+                },
+                {
+                    "id": "node-ptrs",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {"label": "Pointers & References", "category": "Indirection", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 95, "description": "Memory addresses and dereferencing."}
+                },
+                {
+                    "id": "node-offsets",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {"label": "Struct Field Offsets", "category": "Alignment", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 94, "description": "Accessing object fields relative to base pointer."}
+                },
+                {
+                    "id": "node-guards",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {"label": "Defensive Null Guards", "category": "Safety Check", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 96, "description": "Pre-check base pointer for NULL before dereferencing."}
+                },
+                {
+                    "id": "node-deref",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {"label": "Memory & Bounds Safety", "category": "Verified Clean", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 97, "description": "Verified clean! Pointer arithmetic and memory access are safe."}
+                }
+            ]
+            edges = [
+                {"id": "e-ptr-1", "source": "node-heap", "target": "node-ptrs", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-ptr-2", "source": "node-heap", "target": "node-offsets", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-ptr-3", "source": "node-ptrs", "target": "node-guards", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-ptr-4", "source": "node-offsets", "target": "node-deref", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+            ]
+        else:
+            nodes = [
+                {
+                    "id": "node-heap",
+                    "type": "glowingConcept",
+                    "position": {"x": 30, "y": 150},
+                    "data": {"label": "Memory Allocation", "category": "Foundation Hub", "shape": "circle", "status": "proficient", "proficiency": "proficient", "progress": 96, "description": "Dynamic memory allocation and pointer references."}
+                },
+                {
+                    "id": "node-ptrs",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 40},
+                    "data": {"label": "Pointers & References", "category": "Indirection", "shape": "pill", "status": "proficient", "proficiency": "proficient", "progress": 82, "description": "Memory addresses and dereferencing."}
+                },
+                {
+                    "id": "node-offsets",
+                    "type": "glowingConcept",
+                    "position": {"x": 260, "y": 260},
+                    "data": {"label": "Struct Field Offsets", "category": "Alignment", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 55, "description": "Accessing object fields relative to base pointer."}
+                },
+                {
+                    "id": "node-guards",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 40},
+                    "data": {"label": "Defensive Null Guards", "category": "Safety Check", "shape": "pill", "status": "weakness", "proficiency": "weakness", "progress": 45, "description": "Pre-check base pointer for NULL before dereferencing."}
+                },
+                {
+                    "id": "node-deref",
+                    "type": "glowingConcept",
+                    "position": {"x": 560, "y": 260},
+                    "data": {"label": error_type, "category": "Detected Gap", "shape": "pill", "status": "gap", "proficiency": "gap", "progress": 18, "description": "Critical defect detected during dereference."}
+                }
+            ]
+            edges = [
+                {"id": "e-ptr-1", "source": "node-heap", "target": "node-ptrs", "animated": False, "type": "dataFlow", "style": {"stroke": "#10B981"}},
+                {"id": "e-ptr-2", "source": "node-heap", "target": "node-offsets", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-ptr-3", "source": "node-ptrs", "target": "node-guards", "animated": False, "type": "dataFlow", "style": {"stroke": "#F59E0B"}},
+                {"id": "e-ptr-4", "source": "node-offsets", "target": "node-deref", "animated": True, "type": "dataFlow", "style": {"stroke": "#EF4444"}},
+            ]
         return {"nodes": nodes, "edges": edges}
 
 # --- Route 1: POST /api/analyze ---

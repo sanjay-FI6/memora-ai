@@ -665,9 +665,9 @@ const initialNodesData: Node<ConceptNodeData>[] = [
       label: "NameError & Scope",
       category: "Variable Scope",
       shape: "pill",
-      proficiency: "gap",
-      progress: 25,
-      description: "Referencing variables or functions before definition or across out-of-scope lexicals.",
+      proficiency: "proficient",
+      progress: 92,
+      description: "Referencing variables and functions within proper lexical closures and symbol bindings.",
       linkedSubmissions: [
         {
           submissionId: "sub-104",
@@ -677,13 +677,13 @@ const initialNodesData: Node<ConceptNodeData>[] = [
           snippet: "db_conn = open_database(); conn.query(sql)",
           line: 14,
           attempts: 2,
-          errorDetail: "NameError: 'conn' is referenced outside valid handle assignment."
+          errorDetail: "Historical audit: 'conn' was resolved and cleaned on Day 27."
         }
       ],
       recommendedLesson: {
         title: "Scope & Lexical Lifetime Resolution",
         duration: "15 mins",
-        difficulty: "Fundamental",
+        difficulty: "Mastery",
         focus: "Variable declaration scopes and function closure lifetime.",
       },
     },
@@ -741,9 +741,9 @@ const initialEdgesData: Edge[] = [
     source: "trees",
     target: "name-error",
     type: "dataFlow",
-    style: { stroke: "#EF4444", strokeWidth: 3 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: "#EF4444" },
-    data: { targetProficiency: "gap", isGapTarget: true }
+    style: { stroke: "#10B981", strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: "#10B981" },
+    data: { targetProficiency: "proficient", isGapTarget: false }
   }
 ];
 
