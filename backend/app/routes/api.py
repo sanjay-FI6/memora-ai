@@ -30,6 +30,17 @@ class RecommendationItem(BaseModel):
     ctaText: Optional[str] = "Start Lesson"
     color: Optional[str] = None
 
+class CurriculumTrackItem(BaseModel):
+    track_id: str
+    title: str
+    description: str
+    total_time: str
+    completion_rate: int
+    current_lesson: str
+    completed_modules: int
+    total_modules: int
+    color: Optional[str] = "indigo"
+
 class DynamicConceptNodeData(BaseModel):
     label: str
     category: str
@@ -64,6 +75,7 @@ class AnalysisResponse(BaseModel):
     socratic_hint: str
     concept_gap: List[str]
     recommendations: List[RecommendationItem]
+    curriculum_tracks: Optional[List[CurriculumTrackItem]] = None
     concept_map: Optional[ConceptMapResponse] = None
     nodes: Optional[List[DynamicConceptNode]] = None
     edges: Optional[List[DynamicConceptEdge]] = None
@@ -117,6 +129,7 @@ class HistoryDetailResponse(BaseModel):
     socratic_hint: str
     concept_gaps: List[str]
     recommendations: List[RecommendationItem]
+    curriculum_tracks: Optional[List[CurriculumTrackItem]] = None
     concept_map: Optional[ConceptMapResponse] = None
     nodes: Optional[List[DynamicConceptNode]] = None
     edges: Optional[List[DynamicConceptEdge]] = None
@@ -831,6 +844,203 @@ def generate_dynamic_recommendations(code: str, error_type: str, language: str, 
 
     return recommendations[:3]
 
+def generate_dynamic_curriculum_tracks(code: str, error_type: str, language: str, concept_gaps: List[str]) -> List[dict]:
+    """
+    Dynamically generates personalized learning curriculum tracks based on
+    the analyzed code snippet (e.g. Binary Search, Recursive Trees, Pointer/Memory, Clean Code).
+    """
+    code_lower = code.lower()
+    is_clean = (not error_type) or (error_type in ["No error is found", "Clean Code Check", "none", "None", "clean", "Clean"])
+
+    # 1. Trees / Graphs / Recursion / Linked Lists (check first before general left/right)
+    if any(k in code_lower for k in ["tree", "treenode", "root", "recursion", "recursive", "linkedlist", "self.head", "self.next", "listnode", "dfs", "bfs", "inorder", "preorder", "postorder", "graph"]) or any(k in " ".join(concept_gaps).lower() for k in ["tree", "recursion", "graph", "linked list"]):
+        return [
+            {
+                "track_id": "track-rec-callstacks",
+                "title": "Recursive Call Stacks & Base Condition Invariants",
+                "description": "Guarantee recursive descent termination, preventing stack overflow and null base dereferences.",
+                "total_time": "2.5 HRS TOTAL",
+                "completion_rate": 40,
+                "current_lesson": "Base Case Null Sentinel Evaluation",
+                "completed_modules": 3,
+                "total_modules": 7,
+                "color": "indigo"
+            },
+            {
+                "track_id": "track-tree-architectures",
+                "title": "Tree Depth & Branch Traversal Architectures",
+                "description": "Master in-order, pre-order, post-order, and BFS/DFS topological level-order traversals.",
+                "total_time": "3.0 HRS TOTAL",
+                "completion_rate": 30,
+                "current_lesson": "Iterative vs Recursive Traversal Patterns",
+                "completed_modules": 2,
+                "total_modules": 6,
+                "color": "amber"
+            },
+            {
+                "track_id": "track-ptr-chaining",
+                "title": "Dynamic Reference & Pointer Chaining",
+                "description": "Construct resilient linked nodes with defensive next/prev pointer verification.",
+                "total_time": "2.0 HRS TOTAL",
+                "completion_rate": 65,
+                "current_lesson": "Sentinel Head Nodes & Cycle Prevention",
+                "completed_modules": 3,
+                "total_modules": 5,
+                "color": "purple"
+            }
+        ]
+
+    # 2. Binary Search & Divide and Conquer
+    if any(k in code_lower for k in ["binary_search", "binarysearch", "divide", "conquer"]) or ("mid" in code_lower and any(k in code_lower for k in ["left", "right", "target", "low", "high"])) or any("search" in g.lower() or "binary" in g.lower() for g in concept_gaps):
+        return [
+            {
+                "track_id": "track-bs-invariants",
+                "title": "Logarithmic Search Invariants & Bounds",
+                "description": "Prevent index off-by-one errors and integer midpoint overflow in (left + right) // 2 divide-and-conquer loops.",
+                "total_time": "1.5 HRS TOTAL",
+                "completion_rate": 45,
+                "current_lesson": "Safe Midpoint Arithmetic & Monotonic Space Halving",
+                "completed_modules": 3,
+                "total_modules": 6,
+                "color": "indigo"
+            },
+            {
+                "track_id": "track-bs-divide-conquer",
+                "title": "Divide and Conquer Core Mechanics",
+                "description": "Master monotonic array properties, logarithmic scale reductions, and search space boundary halving.",
+                "total_time": "2.0 HRS TOTAL",
+                "completion_rate": 35,
+                "current_lesson": "Upper and Lower Bound Invariant Contracts",
+                "completed_modules": 2,
+                "total_modules": 5,
+                "color": "purple"
+            },
+            {
+                "track_id": "track-bs-edge-cases",
+                "title": "Edge-Case Testing for Search Routines",
+                "description": "Handle boundary conditions with empty slices, singletons, duplicate elements, and targets outside bounds.",
+                "total_time": "1.2 HRS TOTAL",
+                "completion_rate": 60,
+                "current_lesson": "Boundary Assertion & Search Routine Fuzzing",
+                "completed_modules": 3,
+                "total_modules": 5,
+                "color": "emerald"
+            }
+        ]
+
+    # 3. Clean Code / Verified Clean Snippets
+    if is_clean:
+        return [
+            {
+                "track_id": "track-clean-proofs",
+                "title": "Time & Space Complexity Proofs",
+                "description": "Prove asymptotic time and space guarantees using recurrence trees, master theorem, and loop invariants.",
+                "total_time": "2.0 HRS TOTAL",
+                "completion_rate": 85,
+                "current_lesson": "Asymptotic Bound Formalization & Big-O Rigor",
+                "completed_modules": 5,
+                "total_modules": 6,
+                "color": "indigo"
+            },
+            {
+                "track_id": "track-clean-unit-testing",
+                "title": "Unit Testing & Boundary Assertions",
+                "description": "Author exhaustive test suites covering generative fuzz testing, edge constraints, and invariant checks.",
+                "total_time": "1.5 HRS TOTAL",
+                "completion_rate": 80,
+                "current_lesson": "Property-Based Fuzzing & Mutation Testing",
+                "completed_modules": 4,
+                "total_modules": 5,
+                "color": "emerald"
+            },
+            {
+                "track_id": "track-clean-patterns",
+                "title": "Optimized Implementation Patterns",
+                "description": "Explore cache locality, SIMD vectorization, bitwise arithmetic, and iterative state reductions.",
+                "total_time": "2.5 HRS TOTAL",
+                "completion_rate": 90,
+                "current_lesson": "Bit Manipulation & Cache Spatial Locality",
+                "completed_modules": 6,
+                "total_modules": 7,
+                "color": "purple"
+            }
+        ]
+
+    # 4. Pointer / Memory / Resource Management
+    if any(k in code_lower for k in ["fopen", "socket", "database", "conn", "ptr", "alloc", "free", "malloc", "null", "leak", "pointer", "segmentation"]) or any("pointer" in g.lower() or "resource" in g.lower() for g in concept_gaps):
+        return [
+            {
+                "track_id": "track-ptr-null-safety",
+                "title": "Pointer Validation & Null Safety Verification",
+                "description": "Master heap allocations, lifecycle invariants, and defensive null guards before dereferencing.",
+                "total_time": "2.5 HRS TOTAL",
+                "completion_rate": 68,
+                "current_lesson": "Defensive Struct & Base Pointer Dereferencing",
+                "completed_modules": 5,
+                "total_modules": 8,
+                "color": "indigo"
+            },
+            {
+                "track_id": "track-heap-lifetime",
+                "title": "Dynamic Heap Allocation & Lifetime Controls",
+                "description": "Eliminate memory leaks, orphan allocations, and use-after-free conditions in native environments.",
+                "total_time": "3.2 HRS TOTAL",
+                "completion_rate": 40,
+                "current_lesson": "Memory Profiling & Valgrind Invariant Checks",
+                "completed_modules": 2,
+                "total_modules": 6,
+                "color": "purple"
+            },
+            {
+                "track_id": "track-resource-raii",
+                "title": "Resource Lifecycle & Exception Safety",
+                "description": "Enforce RAII, deterministic context managers, and auto-closing handles for database and I/O sockets.",
+                "total_time": "2.8 HRS TOTAL",
+                "completion_rate": 55,
+                "current_lesson": "Auto-Closing Socket & File Handle Managers",
+                "completed_modules": 3,
+                "total_modules": 5,
+                "color": "amber"
+            }
+        ]
+
+    # 5. General / Default Fallback
+    return [
+        {
+            "track_id": "track-defensive-bounds",
+            "title": "Defensive Coding & Boundary Verification",
+            "description": "Eliminate buffer overflows, off-by-one errors, and unchecked access paths across data structures.",
+            "total_time": "2.8 HRS TOTAL",
+            "completion_rate": 75,
+            "current_lesson": "Safe Index Offset Guarantees",
+            "completed_modules": 4,
+            "total_modules": 5,
+            "color": "emerald"
+        },
+        {
+            "track_id": "track-invariant-design",
+            "title": "Code Structure & Invariant Design",
+            "description": "Design robust functional abstractions, immutable state flows, and deterministic error handling.",
+            "total_time": "2.2 HRS TOTAL",
+            "completion_rate": 50,
+            "current_lesson": "Invariant Contracts & Assertion Guards",
+            "completed_modules": 3,
+            "total_modules": 6,
+            "color": "indigo"
+        },
+        {
+            "track_id": "track-runtime-profiling",
+            "title": "Runtime Execution & Performance Profiling",
+            "description": "Analyze call stack execution depths, heap profiles, and latency bottlenecks.",
+            "total_time": "1.8 HRS TOTAL",
+            "completion_rate": 40,
+            "current_lesson": "Call Stack Analysis & Bottleneck Identification",
+            "completed_modules": 2,
+            "total_modules": 5,
+            "color": "purple"
+        }
+    ]
+
 # --- Route 1: POST /api/analyze ---
 @router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_code(request: CodeSubmissionBase, db: Session = Depends(get_db)):
@@ -854,6 +1064,15 @@ async def analyze_code(request: CodeSubmissionBase, db: Session = Depends(get_db
         concept_gaps=pipeline_result.get("concept_gap", [])
     )
     recommendations = [RecommendationItem(**rec) for rec in recommendations_data]
+    
+    # Generate dynamic curriculum tracks based on topic and invariants
+    curriculum_tracks_data = generate_dynamic_curriculum_tracks(
+        code=request.user_code,
+        error_type=pipeline_result["error_type"],
+        language=request.programming_language,
+        concept_gaps=pipeline_result.get("concept_gap", [])
+    )
+    curriculum_tracks = [CurriculumTrackItem(**t) for t in curriculum_tracks_data]
         
     dynamic_graph = generate_dynamic_concept_graph(
         code=request.user_code,
@@ -886,11 +1105,26 @@ async def analyze_code(request: CodeSubmissionBase, db: Session = Depends(get_db
         "socratic_hint": pipeline_result["socratic_hint"],
         "concept_gap": pipeline_result["concept_gap"],
         "recommendations": recommendations,
+        "curriculum_tracks": curriculum_tracks,
         "concept_map": dynamic_graph,
         "nodes": dynamic_graph["nodes"],
         "edges": dynamic_graph["edges"],
         "error_lines": error_lines
     }
+
+# --- Route 1b: GET /api/curriculum ---
+@router.get("/curriculum", response_model=List[CurriculumTrackItem])
+async def get_curriculum_tracks(topic: Optional[str] = None):
+    """
+    Returns baseline or topic-customized personalized learning curriculum tracks.
+    """
+    tracks = generate_dynamic_curriculum_tracks(
+        code=topic or "",
+        error_type="No error is found" if not topic else "Custom Inspection",
+        language="python",
+        concept_gaps=[topic] if topic else []
+    )
+    return [CurriculumTrackItem(**t) for t in tracks]
 
 # --- Route 2: GET /api/concept-map ---
 @router.get("/concept-map", response_model=ConceptMapResponse)
@@ -1309,6 +1543,13 @@ async def get_history_detail(submission_id: str, db: Session = Depends(get_db)):
             concept_gaps=data.get("concept_gaps", [data.get("concept_gap", "")])
         )
         recommendations = [RecommendationItem(**rec) for rec in recommendations_data]
+        curriculum_tracks_data = generate_dynamic_curriculum_tracks(
+            code=data["code"],
+            error_type=data["defect_title"],
+            language=data["language"],
+            concept_gaps=data.get("concept_gaps", [data.get("concept_gap", "")])
+        )
+        curriculum_tracks = [CurriculumTrackItem(**t) for t in curriculum_tracks_data]
         return HistoryDetailResponse(
             submission_id=data["submission_id"],
             file_name=data["file_name"],
@@ -1334,6 +1575,7 @@ async def get_history_detail(submission_id: str, db: Session = Depends(get_db)):
             socratic_hint=data["socratic_hint"],
             concept_gaps=data["concept_gaps"],
             recommendations=recommendations,
+            curriculum_tracks=curriculum_tracks,
             concept_map=ConceptMapResponse(
                 nodes=dynamic_graph["nodes"],
                 edges=dynamic_graph["edges"]
@@ -1374,6 +1616,13 @@ async def get_history_detail(submission_id: str, db: Session = Depends(get_db)):
         concept_gaps=db_concept_gaps
     )
     recommendations = [RecommendationItem(**rec) for rec in recommendations_data]
+    curriculum_tracks_data = generate_dynamic_curriculum_tracks(
+        code=sub.user_code,
+        error_type=defect_title,
+        language=sub.programming_language,
+        concept_gaps=db_concept_gaps
+    )
+    curriculum_tracks = [CurriculumTrackItem(**t) for t in curriculum_tracks_data]
 
     return HistoryDetailResponse(
         submission_id=sub.submission_id,
@@ -1400,6 +1649,7 @@ async def get_history_detail(submission_id: str, db: Session = Depends(get_db)):
         socratic_hint=cluster.description if cluster else "Inspect identified logic flows.",
         concept_gaps=db_concept_gaps,
         recommendations=recommendations,
+        curriculum_tracks=curriculum_tracks,
         concept_map=ConceptMapResponse(
             nodes=dynamic_graph["nodes"],
             edges=dynamic_graph["edges"]
