@@ -52,12 +52,15 @@ interface ErrorCluster {
 }
 
 interface Recommendation {
-  id: string;
+  id?: string;
   title: string;
   progress: number;
-  duration: string;
-  ctaText: string;
-  color: string;
+  est_time?: string;
+  duration?: string;
+  tag?: string;
+  action_text?: string;
+  ctaText?: string;
+  color?: string;
 }
 
 interface AnalysisResult {
@@ -178,6 +181,42 @@ const CircularProgress = ({ percentage, color = "stroke-indigo-500" }: { percent
   );
 };
 
+const initialRecommendations: Recommendation[] = [
+  {
+    id: "rec-1",
+    title: "Null Pointer Guardrails",
+    est_time: "15 MINS",
+    progress: 65,
+    tag: "Defensive Struct Checks",
+    action_text: "CONTINUE LESSON",
+    duration: "15 mins",
+    ctaText: "Continue Lesson",
+    color: "stroke-indigo-500 text-indigo-400 border-indigo-500/20"
+  },
+  {
+    id: "rec-2",
+    title: "Resource Cleanup & Leaks",
+    est_time: "20 MINS",
+    progress: 35,
+    tag: "Database & I/O",
+    action_text: "START LESSON",
+    duration: "25 mins",
+    ctaText: "Unlock Lesson",
+    color: "stroke-amber-500 text-amber-400 border-amber-500/20"
+  },
+  {
+    id: "rec-3",
+    title: "Array Bounds & Iteration Contracts",
+    est_time: "15 MINS",
+    progress: 90,
+    tag: "Collection Bounds",
+    action_text: "REVIEW CONCEPTS",
+    duration: "10 mins",
+    ctaText: "Review Concepts",
+    color: "stroke-emerald-500 text-emerald-400 border-emerald-500/20"
+  }
+];
+
 export default function DashboardLayout() {
   // Navigation State
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -198,6 +237,9 @@ export default function DashboardLayout() {
     day?: number;
     severity?: string;
   } | null>(null);
+
+  // Targeted Recommendations state
+  const [recommendations, setRecommendations] = useState<Recommendation[]>(initialRecommendations);
 
   // Dynamic Concept Graph states
   const [nodes, setNodes] = useState<any[]>([]);
@@ -250,6 +292,9 @@ export default function DashboardLayout() {
       }
 
       setAnalysisResult(payload);
+      if (payload.recommendations && Array.isArray(payload.recommendations)) {
+        setRecommendations(payload.recommendations);
+      }
       if (payload.nodes && Array.isArray(payload.nodes)) {
         setNodes(payload.nodes);
       }
@@ -299,6 +344,9 @@ export default function DashboardLayout() {
           recommendations: data.recommendations || recommendations,
           error_lines: data.error_lines || []
         });
+        if (data.recommendations && Array.isArray(data.recommendations)) {
+          setRecommendations(data.recommendations);
+        }
         if (data.nodes) setNodes(data.nodes);
         if (data.edges) setEdges(data.edges);
         setActiveTab("Analyze Code");
@@ -331,7 +379,7 @@ export default function DashboardLayout() {
       ],
       socratic_hint: `Review memory and pointer contracts for ${item.file}.`,
       concept_gap: [item.conceptGap],
-      recommendations: recommendations,
+      recommendations: initialRecommendations,
       error_lines: item.error.includes("Null") ? [12] : [7]
     });
     setActiveTab("Analyze Code");
@@ -359,34 +407,6 @@ export default function DashboardLayout() {
       severity: "high",
       attempts: 2,
       description: "Accessing structure indices exceeding upper constraints or below absolute zero."
-    }
-  ];
-
-  // Mock Recommendations
-  const recommendations: Recommendation[] = [
-    {
-      id: "rec-1",
-      title: "Null Pointer Guardrails",
-      progress: 65,
-      duration: "15 mins",
-      ctaText: "Continue Lesson",
-      color: "stroke-indigo-500 text-indigo-400 border-indigo-500/20"
-    },
-    {
-      id: "rec-2",
-      title: "Garbage Collection & Leaks",
-      progress: 35,
-      duration: "25 mins",
-      ctaText: "Unlock Lesson",
-      color: "stroke-amber-500 text-amber-400 border-amber-500/20"
-    },
-    {
-      id: "rec-3",
-      title: "Defensive Struct Checks",
-      progress: 90,
-      duration: "10 mins",
-      ctaText: "Review Concepts",
-      color: "stroke-emerald-500 text-emerald-400 border-emerald-500/20"
     }
   ];
 
@@ -931,38 +951,45 @@ export default function DashboardLayout() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {(analysisResult?.recommendations || recommendations).map((rec) => (
+                    {recommendations.map((rec, idx) => (
                       <div 
-                        key={rec.id} 
-                        className="glass-panel p-4 flex flex-col justify-between border border-slate-700/40 relative hover:-translate-y-1 transition-all duration-300"
+                        key={rec.id || `rec-${idx}`} 
+                        className="glass-panel p-4 flex flex-col justify-between border border-slate-700/40 relative hover:-translate-y-1 transition-all duration-300 group"
                       >
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex flex-col min-w-0">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-indigo-400/80" />
-                              {rec.duration}
-                            </span>
-                            <h3 className="font-bold text-xs text-slate-200 mt-1 leading-tight line-clamp-2">
+                            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-indigo-400/80" />
+                                {rec.est_time || rec.duration || "15 MINS"}
+                              </span>
+                              {rec.tag && (
+                                <span className="px-1.5 py-0.5 text-[8px] font-black uppercase rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 tracking-wider">
+                                  {rec.tag}
+                                </span>
+                              )}
+                            </div>
+                            <h3 className="font-bold text-xs text-slate-200 group-hover:text-white transition-colors mt-0.5 leading-tight line-clamp-2">
                               {rec.title}
                             </h3>
                           </div>
                           
                           <CircularProgress 
                             percentage={rec.progress} 
-                            color={rec.color.split(" ")[0]} 
+                            color={rec.color ? rec.color.split(" ")[0] : (rec.progress >= 70 ? "stroke-emerald-500" : rec.progress >= 40 ? "stroke-indigo-500" : "stroke-amber-500")} 
                           />
                         </div>
 
                         <button 
                           onClick={() => setActiveTab("Learning Path")}
-                          className={`w-full py-2 border rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                          className={`w-full py-2 border rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
                             rec.progress < 50 
                               ? "bg-indigo-500/10 hover:bg-indigo-500 text-indigo-300 hover:text-white border-indigo-500/30" 
                               : "bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700/60"
                           }`}
                         >
                           <Play className="w-2.5 h-2.5 fill-current" />
-                          {rec.ctaText}
+                          {rec.action_text || rec.ctaText || (rec.progress < 50 ? "START LESSON" : "CONTINUE LESSON")}
                         </button>
                       </div>
                     ))}

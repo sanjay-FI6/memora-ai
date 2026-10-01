@@ -20,11 +20,14 @@ class ErrorClusterResponse(BaseModel):
     description: str
 
 class RecommendationItem(BaseModel):
-    id: str
+    id: Optional[str] = None
     title: str
+    est_time: Optional[str] = "15 MINS"
     progress: int
-    duration: str
-    ctaText: str
+    tag: Optional[str] = "Core Concept"
+    action_text: Optional[str] = "START LESSON"
+    duration: Optional[str] = "15 MINS"
+    ctaText: Optional[str] = "Start Lesson"
     color: Optional[str] = None
 
 class DynamicConceptNodeData(BaseModel):
@@ -701,6 +704,133 @@ def generate_dynamic_concept_graph(code: str, error_type: str, language: str) ->
             ]
         return {"nodes": nodes, "edges": edges}
 
+def generate_dynamic_recommendations(code: str, error_type: str, language: str, concept_gaps: List[str]) -> List[dict]:
+    """
+    Inspects incoming code snippet for common defect/concept patterns
+    and returns tailored, dynamic recommendations with title, est_time,
+    progress, tag, and action_text.
+    """
+    code_lower = code.lower()
+    has_error = error_type not in ["No error is found", "Clean Code Check", ""]
+    recommendations = []
+
+    # 1. Null / Undefined Checks & Defensive Struct Guardrails
+    if any(k in code_lower for k in ["null", "none", "nullptr", "undefined", "->", ".get(", "self.head", "self.next", "root."]) or any("null" in g.lower() or "pointer" in g.lower() for g in concept_gaps):
+        progress_val = 65 if not has_error else 40
+        recommendations.append({
+            "id": "rec-null-safety",
+            "title": "Null Pointer Guardrails",
+            "est_time": "15 MINS",
+            "progress": progress_val,
+            "tag": "Defensive Struct Checks",
+            "action_text": "CONTINUE LESSON" if progress_val >= 50 else "START LESSON",
+            "duration": "15 mins",
+            "ctaText": "Continue Lesson" if progress_val >= 50 else "Start Lesson",
+            "color": "stroke-indigo-500 text-indigo-400 border-indigo-500/20"
+        })
+
+    # 2. Database & I/O Resource Leaks / Guaranteed Cleanup
+    if any(k in code_lower for k in ["fopen", "fclose", "open_database", "database", "socket", "conn", "connection", "cursor", "with "]) or any("resource" in g.lower() or "leak" in g.lower() for g in concept_gaps):
+        progress_val = 75 if not has_error else 35
+        recommendations.append({
+            "id": "rec-resource-cleanup",
+            "title": "Resource Cleanup & Leaks",
+            "est_time": "20 MINS",
+            "progress": progress_val,
+            "tag": "Database & I/O",
+            "action_text": "CONTINUE LESSON" if progress_val >= 50 else "START LESSON",
+            "duration": "20 mins",
+            "ctaText": "Continue Lesson" if progress_val >= 50 else "Start Lesson",
+            "color": "stroke-amber-500 text-amber-400 border-amber-500/20"
+        })
+
+    # 3. Array Bounds & Index Contracts
+    if any(k in code_lower for k in ["arr", "matrix", "buffer", "index", "vector", "[", "range(", "len(", "sizeof"]) or any("bound" in g.lower() or "index" in g.lower() for g in concept_gaps):
+        progress_val = 80 if not has_error else 30
+        recommendations.append({
+            "id": "rec-bounds-checks",
+            "title": "Array Bounds & Iteration Contracts",
+            "est_time": "15 MINS",
+            "progress": progress_val,
+            "tag": "Collection Bounds",
+            "action_text": "REVIEW CONCEPTS" if progress_val >= 50 else "START LESSON",
+            "duration": "15 mins",
+            "ctaText": "Review Concepts" if progress_val >= 50 else "Start Lesson",
+            "color": "stroke-emerald-500 text-emerald-400 border-emerald-500/20"
+        })
+
+    # 4. Type Contracts & Scope Validation
+    if any(k in code_lower for k in ["isinstance", "type(", "int(", "str(", "except", "catch", "raise", "throw"]) or any("scope" in g.lower() or "name" in g.lower() or "type" in g.lower() for g in concept_gaps):
+        progress_val = 70 if not has_error else 25
+        recommendations.append({
+            "id": "rec-type-contracts",
+            "title": "Type Contracts & Scope Validation",
+            "est_time": "10 MINS",
+            "progress": progress_val,
+            "tag": "Type & Scope",
+            "action_text": "CONTINUE LESSON" if progress_val >= 50 else "START LESSON",
+            "duration": "10 mins",
+            "ctaText": "Continue Lesson" if progress_val >= 50 else "Start Lesson",
+            "color": "stroke-indigo-500 text-indigo-400 border-indigo-500/20"
+        })
+
+    # 5. Linked Lists & Reference Chaining
+    if any(k in code_lower for k in ["linkedlist", "node", "tree", "binary_search", "self.head", "self.next", "root"]):
+        progress_val = 85 if not has_error else 45
+        recommendations.append({
+            "id": "rec-data-structures",
+            "title": "Dynamic Reference & Node Chaining",
+            "est_time": "20 MINS",
+            "progress": progress_val,
+            "tag": "Data Structures",
+            "action_text": "CONTINUE LESSON" if progress_val >= 50 else "START LESSON",
+            "duration": "20 mins",
+            "ctaText": "Continue Lesson" if progress_val >= 50 else "Start Lesson",
+            "color": "stroke-purple-500 text-purple-400 border-purple-500/20"
+        })
+
+    # Fallback to ensure at least 2-3 dynamic recommendation cards
+    if not has_error:
+        if len(recommendations) < 2:
+            recommendations.append({
+                "id": "rec-clean-tests",
+                "title": "Edge Case & Invariant Testing",
+                "est_time": "15 MINS",
+                "progress": 90,
+                "tag": "Verification",
+                "action_text": "REVIEW CONCEPTS",
+                "duration": "15 mins",
+                "ctaText": "Review Concepts",
+                "color": "stroke-emerald-500 text-emerald-400 border-emerald-500/20"
+            })
+        if len(recommendations) < 3:
+            recommendations.append({
+                "id": "rec-clean-asymptotics",
+                "title": "Algorithm Complexity Optimization",
+                "est_time": "10 MINS",
+                "progress": 85,
+                "tag": "Complexity O(N)",
+                "action_text": "START LESSON",
+                "duration": "10 mins",
+                "ctaText": "Start Lesson",
+                "color": "stroke-indigo-500 text-indigo-400 border-indigo-500/20"
+            })
+    else:
+        if len(recommendations) < 2:
+            recommendations.append({
+                "id": "rec-general-defensive",
+                "title": "Defensive Struct Checks",
+                "est_time": "10 MINS",
+                "progress": 30,
+                "tag": "Safety Invariants",
+                "action_text": "START LESSON",
+                "duration": "10 mins",
+                "ctaText": "Start Lesson",
+                "color": "stroke-emerald-500 text-emerald-400 border-emerald-500/20"
+            })
+
+    return recommendations[:3]
+
 # --- Route 1: POST /api/analyze ---
 @router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_code(request: CodeSubmissionBase, db: Session = Depends(get_db)):
@@ -716,84 +846,14 @@ async def analyze_code(request: CodeSubmissionBase, db: Session = Depends(get_db
         db=db
     )
     
-    # Build recommendations dynamically based on identified concept gaps
-    recommendations = []
-    concept_map = {
-        "Pointers": ("Null Pointer Guardrails", 65, "15 mins"),
-        "Memory Allocation": ("Memory Lifecycle & Leaks", 35, "25 mins"),
-        "Defensive Programming": ("Defensive Struct Checks", 90, "10 mins"),
-        "Resource Lifecycle": ("Resource Lifecycle & Leaks", 35, "25 mins"),
-        "Garbage Collection": ("Garbage Collection & Leaks", 35, "25 mins"),
-        "Syntax Rules": ("Syntax and Structure Review", 20, "10 mins"),
-        "Parsing": ("Parsing Fundamentals", 30, "15 mins"),
-        "Input Validation": ("Validate External Inputs", 40, "15 mins"),
-        "Division Safety": ("Safe Arithmetic Operations", 25, "10 mins"),
-        "Boundary Checks": ("Collection Boundary Checks", 35, "15 mins"),
-        "Type Validation": ("Type Contracts and Guards", 30, "20 mins"),
-        "Variable Scope": ("Scope and Name Resolution", 45, "15 mins"),
-        "Dictionary Keys": ("Safe Dictionary Access", 35, "15 mins"),
-        "Exception Safety": ("Reliable Cleanup Patterns", 40, "20 mins"),
-    }
-    
-    for concept in pipeline_result["concept_gap"]:
-        if concept in concept_map:
-            title, progress, duration = concept_map[concept]
-            recommendations.append({
-                "id": f"rec-{concept.lower().replace(' ', '-')}",
-                "title": title,
-                "progress": progress,
-                "duration": duration,
-                "ctaText": "Continue Lesson" if progress > 50 else "Unlock Lesson",
-                "color": "stroke-indigo-500 text-indigo-400 border-indigo-500/20"
-            })
-            
-    # Fallback recommendations if concepts do not map directly
-    if pipeline_result["error_type"] == "No error is found":
-        recommendations = [
-            {
-                "id": "rec-tests",
-                "title": "Add Tests for Edge Cases",
-                "progress": 50,
-                "duration": "15 mins",
-                "ctaText": "Start Practice",
-                "color": "stroke-emerald-500 text-emerald-400 border-emerald-500/20"
-            },
-            {
-                "id": "rec-review",
-                "title": "Code Quality Review",
-                "progress": 60,
-                "duration": "10 mins",
-                "ctaText": "Review Concepts",
-                "color": "stroke-indigo-500 text-indigo-400 border-indigo-500/20"
-            },
-        ]
-    elif not recommendations:
-        recommendations = [
-            {
-                "id": "rec-pointers",
-                "title": "Null Pointer Guardrails",
-                "progress": 65,
-                "duration": "15 mins",
-                "ctaText": "Continue Lesson",
-                "color": "stroke-indigo-500 text-indigo-400 border-indigo-500/20"
-            },
-            {
-                "id": "rec-memory",
-                "title": "Garbage Collection & Leaks",
-                "progress": 35,
-                "duration": "25 mins",
-                "ctaText": "Unlock Lesson",
-                "color": "stroke-amber-500 text-amber-400 border-amber-500/20"
-            },
-            {
-                "id": "rec-defensive",
-                "title": "Defensive Struct Checks",
-                "progress": 90,
-                "duration": "10 mins",
-                "ctaText": "Review Concepts",
-                "color": "stroke-emerald-500 text-emerald-400 border-emerald-500/20"
-            }
-        ]
+    # Generate dynamic learning path recommendations based on analyzed code & concept patterns
+    recommendations_data = generate_dynamic_recommendations(
+        code=request.user_code,
+        error_type=pipeline_result["error_type"],
+        language=request.programming_language,
+        concept_gaps=pipeline_result.get("concept_gap", [])
+    )
+    recommendations = [RecommendationItem(**rec) for rec in recommendations_data]
         
     dynamic_graph = generate_dynamic_concept_graph(
         code=request.user_code,
@@ -1242,16 +1302,13 @@ async def get_history_detail(submission_id: str, db: Session = Depends(get_db)):
             error_type=data["defect_title"],
             language=data["language"]
         )
-        recommendations = [
-            RecommendationItem(
-                id=f"rec-{submission_id}-1",
-                title=f"{data['concept_gap']} Mastery",
-                progress=65,
-                duration="15 mins",
-                ctaText="Continue Lesson",
-                color="stroke-indigo-500 text-indigo-400 border-indigo-500/20"
-            )
-        ]
+        recommendations_data = generate_dynamic_recommendations(
+            code=data["code"],
+            error_type=data["defect_title"],
+            language=data["language"],
+            concept_gaps=data.get("concept_gaps", [data.get("concept_gap", "")])
+        )
+        recommendations = [RecommendationItem(**rec) for rec in recommendations_data]
         return HistoryDetailResponse(
             submission_id=data["submission_id"],
             file_name=data["file_name"],
@@ -1309,6 +1366,14 @@ async def get_history_detail(submission_id: str, db: Session = Depends(get_db)):
                 error_lines.append(idx)
 
     created_str = sub.created_at.strftime("%Y-%m-%d %H:%M") if sub.created_at else "Recently"
+    db_concept_gaps = [cluster.title] if cluster else ["Logic & Debugging"]
+    recommendations_data = generate_dynamic_recommendations(
+        code=sub.user_code,
+        error_type=defect_title,
+        language=sub.programming_language,
+        concept_gaps=db_concept_gaps
+    )
+    recommendations = [RecommendationItem(**rec) for rec in recommendations_data]
 
     return HistoryDetailResponse(
         submission_id=sub.submission_id,
@@ -1333,17 +1398,8 @@ async def get_history_detail(submission_id: str, db: Session = Depends(get_db)):
             )
         ],
         socratic_hint=cluster.description if cluster else "Inspect identified logic flows.",
-        concept_gaps=["Logic & Debugging"],
-        recommendations=[
-            RecommendationItem(
-                id=f"rec-{sub.id}",
-                title="Code Quality Review",
-                progress=50,
-                duration="15 mins",
-                ctaText="Review Concepts",
-                color="stroke-indigo-500 text-indigo-400 border-indigo-500/20"
-            )
-        ],
+        concept_gaps=db_concept_gaps,
+        recommendations=recommendations,
         concept_map=ConceptMapResponse(
             nodes=dynamic_graph["nodes"],
             edges=dynamic_graph["edges"]
