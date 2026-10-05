@@ -43,12 +43,13 @@ class CurriculumTrackItem(BaseModel):
 
 class DynamicConceptNodeData(BaseModel):
     label: str
-    category: str
+    category: Optional[str] = "Foundation"
     status: Optional[str] = "proficient"  # "proficient" | "weakness" | "gap"
     proficiency: Optional[str] = "proficient"  # "proficient" | "weakness" | "gap"
-    progress: int
-    description: str
+    progress: Optional[int] = 85
+    description: Optional[str] = "Core concept foundational node."
     shape: Optional[str] = "pill"
+    level: Optional[str] = None
 
 class DynamicConceptNode(BaseModel):
     id: str

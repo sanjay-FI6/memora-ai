@@ -45,18 +45,25 @@ test_cases = [
     )
 ]
 
-for name, code, lang in test_cases:
-    payload = {
-        "submission_id": f"test-suite-{name.lower().replace(' ', '-').replace('(', '').replace(')', '')}",
-        "user_code": code,
-        "programming_language": lang
-    }
-    data = json.dumps(payload).encode()
-    req = urllib.request.Request("http://127.0.0.1:8010/api/analyze", data=data, headers={"Content-Type": "application/json"})
-    res = urllib.request.urlopen(req)
-    out = json.loads(res.read())
-    print(f"=== {name} ===")
-    print("Detected Error:", out["error_clusters"][0]["title"])
-    print("Nodes:", [f"{n['data']['label']} [{n['data']['status']}]" for n in out["nodes"]])
-    print("Edges:", len(out["edges"]), "Animated edges:", sum(1 for e in out["edges"] if e.get("animated")))
-    print()
+def run_manual_graph_verification():
+    for name, code, lang in test_cases:
+        payload = {
+            "submission_id": f"test-suite-{name.lower().replace(' ', '-').replace('(', '').replace(')', '')}",
+            "user_code": code,
+            "programming_language": lang
+        }
+        data = json.dumps(payload).encode()
+        try:
+            req = urllib.request.Request("http://127.0.0.1:8010/api/analyze", data=data, headers={"Content-Type": "application/json"})
+            res = urllib.request.urlopen(req)
+            out = json.loads(res.read())
+            print(f"=== {name} ===")
+            print("Detected Error:", out["error_clusters"][0]["title"])
+            print("Nodes:", [f"{n['data']['label']} [{n['data']['status']}]" for n in out["nodes"]])
+            print("Edges:", len(out["edges"]), "Animated edges:", sum(1 for e in out["edges"] if e.get("animated")))
+            print()
+        except Exception as e:
+            print(f"Server not running at http://127.0.0.1:8010: {e}")
+
+if __name__ == "__main__":
+    run_manual_graph_verification()
