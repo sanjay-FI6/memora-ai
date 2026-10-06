@@ -307,6 +307,57 @@ def call_llm_analysis(code: str, stack_trace: str, db: Session | None = None) ->
     if db is not None:
         predicted_error = predict_error_type(code, db)
 
+    if predicted_error and predicted_error != "Clean Code Check":
+        if "Null" in predicted_error or "Pointer" in predicted_error:
+            return {
+                "error_type": predicted_error,
+                "pattern_cluster": "Unchecked Reference Access",
+                "concept_gap": ["Pointers", "Memory Allocation", "Defensive Programming"],
+                "socratic_hint": "Before dereferencing a pointer or property, check whether the value could be null and guard it before use."
+            }
+        if "Index" in predicted_error or "Bounds" in predicted_error or "Buffer" in predicted_error:
+            return {
+                "error_type": predicted_error,
+                "pattern_cluster": "Array Bounds Invariant",
+                "concept_gap": ["Boundary Checks", "Collection Bounds", "Safe Offset Guarantees"],
+                "socratic_hint": "Verify the boundary conditions and index ranges before accessing array or collection offsets."
+            }
+        if "Resource" in predicted_error or "Leak" in predicted_error:
+            return {
+                "error_type": predicted_error,
+                "pattern_cluster": "Resource Lifecycle & RAII",
+                "concept_gap": ["File Descriptors", "Resource Cleanup", "Context Managers"],
+                "socratic_hint": "Ensure resources, file streams, and memory handles are properly released or wrapped in context managers."
+            }
+        if "Recursion" in predicted_error or "Stack" in predicted_error:
+            return {
+                "error_type": predicted_error,
+                "pattern_cluster": "Base Condition Missing",
+                "concept_gap": ["Recursion Termination", "Call Stack Growth", "Base Cases"],
+                "socratic_hint": "Inspect the recursive descent condition. Is there a guaranteed base case that terminates recursion?"
+            }
+        if "Search" in predicted_error or "Binary" in predicted_error:
+            return {
+                "error_type": predicted_error,
+                "pattern_cluster": "Divide and Conquer Core Mechanics",
+                "concept_gap": ["Monotonic Sequences", "Midpoint Invariants", "Logarithmic Bounds"],
+                "socratic_hint": "Verify how search space boundaries (left, right, mid) are updated on each step."
+            }
+        if "Use After Free" in predicted_error or "Lifetime" in predicted_error:
+            return {
+                "error_type": predicted_error,
+                "pattern_cluster": "Lifetime Management",
+                "concept_gap": ["Memory Management", "Object Lifetime", "Resource Cleanup"],
+                "socratic_hint": "Trace the lifetime of the memory or resource and confirm it is still valid before using it again."
+            }
+        if "NameError" in predicted_error or "ReferenceError" in predicted_error:
+            return {
+                "error_type": predicted_error,
+                "pattern_cluster": "Undefined Reference",
+                "concept_gap": ["Variable Scope", "Naming", "Dependency Tracking"],
+                "socratic_hint": "Check if the variable or function is defined before using it. Did you misspell the name?"
+            }
+
     # Mock analysis fallback
     def get_local_mock_analysis():
         return detect_local_analysis(code, stack_trace, "")
@@ -321,43 +372,6 @@ def call_llm_analysis(code: str, stack_trace: str, db: Session | None = None) ->
                 "socratic_hint": "Where is this name introduced, and is it available in the current scope before use? Did you mean 'print'?"
             }
         return local_analysis
-
-    if predicted_error:
-        if "Null" in predicted_error or "Pointer" in predicted_error:
-            return {
-                "error_type": predicted_error,
-                "pattern_cluster": "Unchecked Reference Access",
-                "concept_gap": ["Pointers", "Memory Allocation", "Defensive Programming"],
-                "socratic_hint": "Before dereferencing a pointer or property, check whether the value could be null and guard it before use."
-            }
-        if "Use After Free" in predicted_error or "Lifetime" in predicted_error:
-            return {
-                "error_type": predicted_error,
-                "pattern_cluster": "Lifetime Management",
-                "concept_gap": ["Memory Management", "Object Lifetime", "Resource Cleanup"],
-                "socratic_hint": "Trace the lifetime of the memory or resource and confirm it is still valid before using it again."
-            }
-        if "AttributeError" in predicted_error:
-            return {
-                "error_type": predicted_error,
-                "pattern_cluster": "None Handling",
-                "concept_gap": ["None Checks", "Object Validation", "Guard Clauses"],
-                "socratic_hint": "Check whether the object can be empty or missing before accessing its attributes or methods."
-            }
-        if "IndexError" in predicted_error:
-            return {
-                "error_type": predicted_error,
-                "pattern_cluster": "Bounds Validation",
-                "concept_gap": ["List Indexing", "Boundary Checks", "Collection Safety"],
-                "socratic_hint": "Verify the valid index range before accessing the collection element."
-            }
-        if "NameError" in predicted_error or "ReferenceError" in predicted_error:
-            return {
-                "error_type": predicted_error,
-                "pattern_cluster": "Undefined Reference",
-                "concept_gap": ["Variable Scope", "Naming", "Dependency Tracking"],
-                "socratic_hint": "Check if the variable or function is defined before using it. Did you misspell the name?"
-            }
 
     try:
         system_prompt = (
