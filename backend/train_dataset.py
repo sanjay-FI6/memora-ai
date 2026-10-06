@@ -1,159 +1,56 @@
 """
 Memora AI - Local Dataset Trainer & Seeder
-Loads/seeds verified code defect examples and trains the Scikit-Learn classification model.
+Uses tests/data.json to populate the local database (memoradb.db)
+and trains the Scikit-Learn TF-IDF + Logistic Regression classification model.
 """
 
 import os
 from pathlib import Path
 from app.db.session import SessionLocal, engine, Base
 from app.db.models import User, ErrorClassificationExample
+from app.training.dataset import DATA_JSON_PATH, ingest_data_json_into_db, load_verified_training_examples
 from app.training.train_model import train_error_classifier, MODEL_PATH
 from app.training.predict import predict_error_type
 
 
-def seed_and_train():
-    print("=" * 60)
+def seed_and_train(max_records: int = 500):
+    print("=" * 65)
     print("Memora AI - Local Machine Learning Training Pipeline")
-    print("=" * 60)
+    print(f"Dataset Source: tests/data.json ({DATA_JSON_PATH})")
+    print("=" * 65)
 
     # 1. Initialize DB Schema
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
     try:
-        # 2. Ensure default user exists
-        user = db.query(User).filter_by(username="trainer_admin").first()
-        if not user:
-            user = User(
-                username="trainer_admin",
-                email="admin@memora.ai",
-                hashed_password="hashed_placeholder_pw"
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+        # 2. Check tests/data.json existence
+        if not DATA_JSON_PATH.exists():
+            print(f"[!] Warning: tests/data.json not found at {DATA_JSON_PATH}")
+        else:
+            size_mb = DATA_JSON_PATH.stat().st_size / (1024 * 1024)
+            print(f"[*] Found tests/data.json dataset ({size_mb:.2f} MB).")
 
-        # 3. Seed verified training examples if database has fewer than 8 examples
-        existing_count = db.query(ErrorClassificationExample).filter_by(is_verified=True).count()
-        print(f"[*] Found {existing_count} existing verified training examples in database.")
+            # Ingest records from tests/data.json into local SQLite database
+            print(f"[*] Ingesting up to {max_records} samples from data.json into memoradb.db...")
+            new_records = ingest_data_json_into_db(db, max_records=max_records)
+            print(f"[OK] Ingested {new_records} new verified records from data.json into the local database.")
 
-        if existing_count < 8:
-            print("[*] Seeding verified benchmark code-defect datasets...")
-            dataset_samples = [
-                # Null Pointer Dereference
-                (
-                    "int* p = NULL; *p = 10;",
-                    "Segmentation fault: 11",
-                    "Null Pointer Dereference",
-                    "Unchecked Pointer Access",
-                    "c"
-                ),
-                (
-                    "char* ptr = 0; printf('%s', ptr);",
-                    "Segmentation fault (core dumped)",
-                    "Null Pointer Dereference",
-                    "Unchecked Pointer Access",
-                    "c"
-                ),
-                (
-                    "struct Node* next = NULL; int val = next->val;",
-                    "Fatal error: EXC_BAD_ACCESS (code=1, address=0x0)",
-                    "Null Pointer Dereference",
-                    "Unchecked Pointer Access",
-                    "c"
-                ),
+        # 3. Check total verified examples in database
+        total_examples = db.query(ErrorClassificationExample).filter_by(is_verified=True).count()
+        print(f"[*] Total verified training examples in local database: {total_examples}")
 
-                # Index Out of Bounds / Buffer Overflow
-                (
-                    "int arr[5]; for(int i=0; i<=5; i++) arr[i] = i * 2;",
-                    "*** stack smashing detected ***: terminated",
-                    "Index Out of Bounds / Buffer Overflow",
-                    "Array Bounds Invariant",
-                    "c"
-                ),
-                (
-                    "numbers = [10, 20, 30]\nprint(numbers[10])",
-                    "IndexError: list index out of range",
-                    "Index Out of Bounds / Buffer Overflow",
-                    "Collection Bounds",
-                    "python"
-                ),
-                (
-                    "int[] list = new int[3]; list[5] = 99;",
-                    "java.lang.ArrayIndexOutOfBoundsException: Index 5 out of bounds for length 3",
-                    "Index Out of Bounds / Buffer Overflow",
-                    "Array Bounds Invariant",
-                    "java"
-                ),
-
-                # Unclosed Resource Leak
-                (
-                    "FILE* fp = fopen('log.txt', 'r'); char buf[100]; fgets(buf, 100, fp);",
-                    "ResourceWarning: unclosed file descriptor",
-                    "Unclosed Resource Leak",
-                    "Resource Lifecycle & RAII",
-                    "c"
-                ),
-                (
-                    "f = open('data.csv')\nrows = f.readlines()",
-                    "ResourceWarning: unclosed file <_io.TextIOWrapper>",
-                    "Unclosed Resource Leak",
-                    "Resource Lifecycle & RAII",
-                    "python"
-                ),
-
-                # Recursion Stack Overflow
-                (
-                    "def fib(n):\n    return fib(n-1) + fib(n-2)",
-                    "RecursionError: maximum recursion depth exceeded in comparison",
-                    "Recursion Stack Overflow",
-                    "Base Condition Missing",
-                    "python"
-                ),
-                (
-                    "void traverse(Node* root) {\n    traverse(root->left);\n}",
-                    "Segmentation fault / Call Stack Overflow",
-                    "Recursion Stack Overflow",
-                    "Base Condition Missing",
-                    "c"
-                ),
-
-                # Undefined Reference / NameError
-                (
-                    "rint('Hello World')",
-                    "NameError: name 'rint' is not defined",
-                    "NameError",
-                    "Undefined Identifier Reference",
-                    "python"
-                ),
-                (
-                    "let total = amount + taxRate;",
-                    "ReferenceError: amount is not defined",
-                    "ReferenceError",
-                    "Undefined Identifier Reference",
-                    "javascript"
-                ),
-            ]
-
-            for i, (code, trace, err, pat, lang) in enumerate(dataset_samples):
-                example = ErrorClassificationExample(
-                    user_id=user.id,
-                    source_submission_id=f"seed-sample-{i+1}",
-                    programming_language=lang,
-                    user_code=code,
-                    stack_trace=trace,
-                    error_type=err,
-                    pattern_cluster=pat,
-                    concept_gap="Safety & Verification",
-                    is_verified=True,
-                    reviewer_notes="Benchmark curated training sample"
-                )
-                db.add(example)
-            db.commit()
-            print(f"[OK] Seeded {len(dataset_samples)} verified training examples.")
+        # Show label distribution
+        labels = {}
+        for row in db.query(ErrorClassificationExample.error_type).filter_by(is_verified=True).all():
+            lbl = row[0]
+            labels[lbl] = labels.get(lbl, 0) + 1
+        print("\n[*] Dataset Class Distribution:")
+        for lbl, count in sorted(labels.items(), key=lambda x: -x[1]):
+            print(f"    - {lbl}: {count} samples")
 
         # 4. Run Model Training Pipeline
-        print("\n[*] Training TF-IDF + Logistic Regression Classifier...")
+        print("\n[*] Training TF-IDF + Logistic Regression Classifier on the local dataset...")
         result = train_error_classifier(db)
         print(f"[OK] Training Completed: {result}")
         print(f"[OK] Model Artifact Saved At: {MODEL_PATH}")
@@ -164,6 +61,7 @@ def seed_and_train():
             ("int* data = NULL; *data = 42;", "C Null Pointer"),
             ("items = [1, 2]; x = items[99]", "Python Out of Bounds"),
             ("fp = open('test.txt'); data = fp.read()", "Python Resource Leak"),
+            ("def binary_search(arr, target): mid = (left + right) // 2", "Python Binary Search"),
             ("def solve(x): return solve(x + 1)", "Python Infinite Recursion")
         ]
 
@@ -171,7 +69,7 @@ def seed_and_train():
             pred = predict_error_type(snippet, db)
             print(f"  - [{desc}] -> Predicted Label: {pred}")
 
-        print("\n[OK] Local Machine Learning Dataset is fully trained and operational!")
+        print("\n[OK] Model successfully trained on tests/data.json and ready for production!")
 
     finally:
         db.close()
